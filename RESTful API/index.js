@@ -6,6 +6,7 @@ Primary file for the API
 const http = require('http');
 const url = require('url');
 let StringDecoder = require('string_decoder').StringDecoder;
+let config = require('./config');
 
 // The server should respond to all requests with a string
 const server = http.createServer(function (req, res) {
@@ -54,10 +55,10 @@ const server = http.createServer(function (req, res) {
     chosenHandler(data,function(statusCode,payload){
 
       // Use the status code returned from the handler, or set the default status code to 200
-      statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+      statusCode = typeof(statusCode) === 'number' ? statusCode : 400;
 
       // Use the payload returned from the handler, or set the default payload to an empty object
-      payload = typeof(payload) == 'object'? payload : {};
+      payload = typeof(payload) === 'object'? payload : {};
 
       // Convert the payload to a string
       var payloadString = JSON.stringify(payload);
@@ -76,8 +77,8 @@ const server = http.createServer(function (req, res) {
 //=================================================================================================
 
 // Start the server, and have it listen on port 3000
-server.listen(3000, function () {
-  console.log("The server is listening on Port 3000 now");
+server.listen(config.port, function () {
+  console.log("The server is listening on Port "+config.port+" in "+config.envName+" mode");
 });
 
 //==================================================================================================
@@ -88,7 +89,11 @@ let handlers = {};
 //Sample Handler 
 handlers.sample = function (data, callback) {
   //Callback a http status code, and a payload object
-  callback(406, { 'name': 'sample handler' });
+  callback(200, { 'name': 'sample handler' });
+};
+
+handlers.home = function (data, callback) {
+  callback(401);
 };
 
 //Not found handler
@@ -100,7 +105,8 @@ handlers.notFound = function (data, callback) {
 
 //Define request router
 let router = {
-  'sample': handlers.sample
+  'sample': handlers.sample,
+  'home' : handlers.home,
 };
 
 //===================================================================================================
